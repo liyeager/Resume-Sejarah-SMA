@@ -1,29 +1,22 @@
-
 import streamlit as st
-import pandas as pd
 import string
 import nltk
+from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
-import matplotlib.pyplot as plt
 
 nltk.download('punkt')
 nltk.download('stopwords')
-stemmer = StemmerFactory().create_stemmer()
-stop_words = set(stopwords.words('indonesian'))
 
 st.set_page_config(page_title="LSA Text Summarizer", layout="wide")
 
+# Styling
 st.markdown("""
     <style>
-        html, body, [class*="css"]  {
+        html, body {
             font-family: 'Comic Sans MS', cursive, sans-serif;
-            background-color: #fff0f5;
-        }
-        .main {
             background-color: #fff0f5;
         }
         h1, h2, h3 {
@@ -38,44 +31,48 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("💗 LSA Text Summarizer (Ringkasan Otomatis Bahasa Indonesia)")
+st.title("💗 LSA Text Summarizer - Input Teks Manual")
 
-uploaded_file = st.file_uploader("📄 Upload file Excel berisi teks", type=["xlsx"])
+# Input teks dari user
+input_text = st.text_area("📝 Masukkan teks untuk diringkas:")
 
-if uploaded_file:
-    df = pd.read_excel(uploaded_file)
-    st.subheader("📊 Tabel Data Awal")
-    st.write(df.head())
+if st.button("🔍 Ringkas Sekarang") and input_text.strip():
+    # Pemrosesan
+    sentences = sent_tokenize(input_text)
+    st.subheader("📄 Teks Asli")
+    for i, kal in enumerate(sentences):
+        st.write(f"{i+1}. {kal}")
 
-    if 'Isi' not in df.columns:
-        st.warning("Kolom 'Isi' tidak ditemukan dalam file.")
-    else:
-        def preprocessing(text):
-            text = text.lower()
-            text = text.translate(str.maketrans('', '', string.punctuation))
-            tokens = word_tokenize(text)
-            filtered = [stemmer.stem(word) for word in tokens if word not in stop_words]
-            return ' '.join(filtered)
+    # Preprocessing untuk pembobotan
+    stemmer = StemmerFactory().create_stemmer()
+    stop_words = set(stopwords.words('indonesian'))
 
-        df['preprocessed'] = df['Isi'].astype(str).apply(preprocessing)
+    def preprocess_for_weight(text):
+        text = text.lower()
+        text = text.translate(str.maketrans('', '', string.punctuation))
+        tokens = word_tokenize(text)
+        tokens = [stemmer.stem(word) for word in tokens if word not in stop_words]
+        return ' '.join(tokens)
 
-        st.subheader("🔍 Hasil Preprocessing")
-        st.write(df[['Isi', 'preprocessed']].head())
+    # Preprocess tiap kalimat
+    preprocessed_sentences = [preprocess_for_weight(s) for s in sentences]
 
-        vectorizer = TfidfVectorizer()
-        X = vectorizer.fit_transform(df['preprocessed'])
-        lsa = TruncatedSVD(n_components=1)
-        lsa_result = lsa.fit_transform(X)
+    # TF-IDF dan LSA
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(preprocessed_sentences)
 
-        df['LSA_Score'] = lsa_result[:, 0]
-        summary_index = df['LSA_Score'].idxmax()
-        summary = df.loc[summary_index, 'Isi']
+    n_components = min(1, len(sentences))  # satu komponen karena ingin ambil skor utama
+    lsa = TruncatedSVD(n_components=n_components)
+    lsa_result = lsa.fit_transform(tfidf_matrix)
 
-        st.subheader("📌 Ringkasan Otomatis")
-        st.info(summary)
+    # Ambil 50% kalimat dengan skor tertinggi
+    scores = lsa_result[:, 0]
+    threshold = sorted(scores, reverse=True)[max(1, len(scores) // 2) - 1]
+    selected_sentences = [sentences[i] for i, score in enumerate(scores) if score >= threshold]
 
-        st.subheader("📈 Visualisasi Skor LSA")
-        fig, ax = plt.subplots()
-        ax.plot(df['LSA_Score'], marker='o', color='#d63384')
-        ax.set_title("Skor LSA per Dokumen")
-        st.pyplot(fig)
+    # Tampilkan hasil ringkasan
+    st.subheader("📌 Hasil Ringkasan (50% Kalimat Terpenting)")
+    for i, kal in enumerate(selected_sentences):
+        st.success(f"{i+1}. {kal}")
+else:
+    st.info("Masukkan teks terlebih dahulu dan klik 'Ringkas Sekarang' untuk melihat hasil.")
