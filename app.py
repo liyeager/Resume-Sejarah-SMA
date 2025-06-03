@@ -38,7 +38,8 @@ input_text = st.text_area("📝 Masukkan teks untuk diringkas:")
 
 if st.button("🔍 Ringkas Sekarang") and input_text.strip():
     # Pemrosesan
-    sentences = sent_tokenize(input_text)
+    sentences = input_text.replace('\n', ' ').split('. ')
+    sentences = [s.strip() + '.' for s in sentences if s.strip()]
     st.subheader("📄 Teks Asli")
     for i, kal in enumerate(sentences):
         st.write(f"{i+1}. {kal}")
