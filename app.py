@@ -9,15 +9,16 @@ from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 
-# === Preload tools ===
+# Hapus semua nltk.download dan word_tokenize
+
+# Inisialisasi tools lokal
 stemmer = StemmerFactory().create_stemmer()
 stop_words = set(StopWordRemoverFactory().get_stop_words())
 tokenizer = RegexpTokenizer(r'\w+')
 
-# === Setup Streamlit ===
+# Streamlit Setup
 st.set_page_config(page_title="LSA Text Summarizer", layout="wide")
 
-# Styling ala coquette pink
 st.markdown("""
     <style>
         html, body {
@@ -38,11 +39,11 @@ st.markdown("""
 
 st.title("💗 LSA Text Summarizer - Input Teks Manual")
 
-# === Input user ===
+# Input dari pengguna
 input_text = st.text_area("📝 Masukkan teks untuk diringkas:")
 
 if st.button("🔍 Ringkas Sekarang") and input_text.strip():
-    # 1. Split jadi kalimat
+    # 1. Split jadi kalimat manual
     sentences = re.split(r'(?<=[.!?])\s+', input_text.strip())
     sentences = [s.strip() for s in sentences if s.strip()]
     st.subheader("📄 Teks Asli")
@@ -59,20 +60,20 @@ if st.button("🔍 Ringkas Sekarang") and input_text.strip():
 
     preprocessed_sentences = [preprocess_for_weight(s) for s in sentences]
 
-    # 3. TF-IDF dan LSA
+    # 3. TF-IDF + LSA
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(preprocessed_sentences)
 
-    n_components = min(1, len(sentences))  # agar tidak error kalau cuma 1 kalimat
+    n_components = min(1, len(sentences))
     lsa = TruncatedSVD(n_components=n_components)
     lsa_result = lsa.fit_transform(tfidf_matrix)
 
-    # 4. Pilih 50% kalimat terpenting
+    # 4. Ringkasan = 50% kalimat teratas
     scores = lsa_result[:, 0]
     threshold = sorted(scores, reverse=True)[max(1, len(scores) // 2) - 1]
     selected_sentences = [sentences[i] for i, score in enumerate(scores) if score >= threshold]
 
-    # 5. Tampilkan hasil
+    # 5. Output
     st.subheader("📌 Hasil Ringkasan (50% Kalimat Terpenting)")
     for i, kal in enumerate(selected_sentences):
         st.success(f"{i+1}. {kal}")
