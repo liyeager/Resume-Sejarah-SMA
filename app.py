@@ -1,18 +1,23 @@
 import streamlit as st
 import string
-import nltk
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.corpus import stopwords
+import numpy as np
+import re
+
 from Sastrawi.Stemmer.StemmerFactory import StemmerFactory
+from Sastrawi.StopWordRemover.StopWordRemoverFactory import StopWordRemoverFactory
+from nltk.tokenize import RegexpTokenizer
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.decomposition import TruncatedSVD
 
-nltk.download('punkt')
-nltk.download('stopwords')
+# === Preload tools ===
+stemmer = StemmerFactory().create_stemmer()
+stop_words = set(StopWordRemoverFactory().get_stop_words())
+tokenizer = RegexpTokenizer(r'\w+')
 
+# === Setup Streamlit ===
 st.set_page_config(page_title="LSA Text Summarizer", layout="wide")
 
-# Styling
+# Styling ala coquette pink
 st.markdown("""
     <style>
         html, body {
@@ -33,45 +38,41 @@ st.markdown("""
 
 st.title("💗 LSA Text Summarizer - Input Teks Manual")
 
-# Input teks dari user
+# === Input user ===
 input_text = st.text_area("📝 Masukkan teks untuk diringkas:")
 
 if st.button("🔍 Ringkas Sekarang") and input_text.strip():
-    # Pemrosesan
-    sentences = input_text.replace('\n', ' ').split('. ')
-    sentences = [s.strip() + '.' for s in sentences if s.strip()]
+    # 1. Split jadi kalimat
+    sentences = re.split(r'(?<=[.!?])\s+', input_text.strip())
+    sentences = [s.strip() for s in sentences if s.strip()]
     st.subheader("📄 Teks Asli")
     for i, kal in enumerate(sentences):
         st.write(f"{i+1}. {kal}")
 
-    # Preprocessing untuk pembobotan
-    stemmer = StemmerFactory().create_stemmer()
-    stop_words = set(stopwords.words('indonesian'))
-
+    # 2. Preprocessing
     def preprocess_for_weight(text):
         text = text.lower()
         text = text.translate(str.maketrans('', '', string.punctuation))
-        tokens = word_tokenize(text)
+        tokens = tokenizer.tokenize(text)
         tokens = [stemmer.stem(word) for word in tokens if word not in stop_words]
         return ' '.join(tokens)
 
-    # Preprocess tiap kalimat
     preprocessed_sentences = [preprocess_for_weight(s) for s in sentences]
 
-    # TF-IDF dan LSA
+    # 3. TF-IDF dan LSA
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(preprocessed_sentences)
 
-    n_components = min(1, len(sentences))  # satu komponen karena ingin ambil skor utama
+    n_components = min(1, len(sentences))  # agar tidak error kalau cuma 1 kalimat
     lsa = TruncatedSVD(n_components=n_components)
     lsa_result = lsa.fit_transform(tfidf_matrix)
 
-    # Ambil 50% kalimat dengan skor tertinggi
+    # 4. Pilih 50% kalimat terpenting
     scores = lsa_result[:, 0]
     threshold = sorted(scores, reverse=True)[max(1, len(scores) // 2) - 1]
     selected_sentences = [sentences[i] for i, score in enumerate(scores) if score >= threshold]
 
-    # Tampilkan hasil ringkasan
+    # 5. Tampilkan hasil
     st.subheader("📌 Hasil Ringkasan (50% Kalimat Terpenting)")
     for i, kal in enumerate(selected_sentences):
         st.success(f"{i+1}. {kal}")
