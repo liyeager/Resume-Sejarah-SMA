@@ -15,58 +15,45 @@ stop_words = set(StopWordRemoverFactory().get_stop_words())
 tokenizer = RegexpTokenizer(r'\w+')
 
 # Streamlit Setup
-st.set_page_config(page_title="Coquette LSA Summarizer", layout="wide")
+st.set_page_config(page_title="LSA Text Summarizer", layout="wide")
 
-# 🎀 CSS: Tema Coquette Pastel
+# Tambahan gaya coquette
 st.markdown("""
     <style>
-        html, body, [class*="css"] {
+        html, body, [class^="css"]  {
             font-family: 'Comic Sans MS', cursive, sans-serif;
-            background-color: #fff0f5;
-            color: #6a1b9a;
-        }
-        h1, h2, h3 {
-            color: #c2185b;
-        }
-        .stTextArea textarea {
-            background-color: #ffe4ec;
-            border: 1.5px solid #e91e63;
-            color: #4a148c;
-            border-radius: 12px;
-        }
-        .stButton>button {
-            background-color: #ffd6e8;
-            color: #b71c1c;
-            font-weight: bold;
-            border-radius: 20px;
-            border: 2px solid #f06292;
-            transition: 0.3s ease;
-        }
-        .stButton>button:hover {
-            background-color: #f8bbd0;
+            background-color: #fce4ec;
             color: #880e4f;
         }
-        .stAlert {
-            border-radius: 16px;
-            background-color: #fce4ec;
-            border-left: 6px solid #f06292;
+        h1, h2, h3, .stMarkdown {
+            color: #ad1457;
+        }
+        .stButton>button {
+            background-color: #f8bbd0;
+            color: #880e4f;
+            border: 1px solid #ad1457;
+            border-radius: 12px;
+            font-weight: bold;
+        }
+        .stTextArea textarea {
+            background-color: #fff0f5;
+            border: 1px solid #f48fb1;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Judul
-st.title("💗 Coquette LSA Text Summarizer")
+st.title("💗 LSA Text Summarizer - Coquette Style")
 
-# Input Teks
-input_text = st.text_area("📝 Tulis atau tempel teks yang ingin diringkas:")
+# Input dari pengguna
+input_text = st.text_area("📝 Masukkan teks untuk diringkas:")
 
-if st.button("💖 Ringkas Sekarang") and input_text.strip():
-    # 1. Split kalimat
+if st.button("🔍 Ringkas Sekarang") and input_text.strip():
+    # 1. Split jadi kalimat manual
     sentences = re.split(r'(?<=[.!?])\s+', input_text.strip())
     sentences = [s.strip() for s in sentences if s.strip()]
 
-    st.subheader("📄 Teks Asli (Paragraf)")
-    st.write(" ".join(sentences))
+    st.subheader("📄 Teks Asli")
+    st.markdown(f"""<div style='background-color:#fce4ec; padding:10px; border-radius:10px'>{input_text}</div>""", unsafe_allow_html=True)
 
     # 2. Preprocessing
     def preprocess_for_weight(text):
@@ -86,14 +73,18 @@ if st.button("💖 Ringkas Sekarang") and input_text.strip():
     lsa = TruncatedSVD(n_components=n_components)
     lsa_result = lsa.fit_transform(tfidf_matrix)
 
-    # 4. Ringkasan 50%
+    # 4. Ringkasan = 50% kalimat teratas
     scores = lsa_result[:, 0]
     threshold = sorted(scores, reverse=True)[max(1, len(scores) // 2) - 1]
     selected_sentences = [sentences[i] for i, score in enumerate(scores) if score >= threshold]
 
-    # 5. Tampilkan hasil
-    st.subheader("🌷 Hasil Ringkasan (Paragraf, 50% Terpenting)")
-    st.success(" ".join(selected_sentences))
+    # 5. Output sebagai paragraf utuh
+    summary_paragraph = " ".join(selected_sentences)
+
+    st.subheader("📌 Hasil Ringkasan (50% Kalimat Terpenting)")
+    st.markdown(f"""<div style='background-color:#f8bbd0; padding:15px; border-radius:15px; font-size:16px;'>
+        {summary_paragraph}
+    </div>""", unsafe_allow_html=True)
 
 else:
-    st.info("Masukkan teks terlebih dahulu dan klik '💖 Ringkas Sekarang'.")
+    st.info("Masukkan teks terlebih dahulu dan klik 'Ringkas Sekarang' untuk melihat hasil.")
