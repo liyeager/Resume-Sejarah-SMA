@@ -42,7 +42,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("💗 LSA Text Summarizer - Coquette Style")
+st.title(" LSA Text Summarizer - Coquette Style")
 
 # Input dari pengguna
 input_text = st.text_area("📝 Masukkan teks untuk diringkas:")
@@ -73,7 +73,7 @@ if st.button("🔍 Ringkas Sekarang") and input_text.strip():
     lsa = TruncatedSVD(n_components=n_components)
     lsa_result = lsa.fit_transform(tfidf_matrix)
 
-    # 4. Ringkasan = 50% kalimat teratas
+    # 4. Ringkasan = 10% kalimat teratas
     scores = lsa_result[:, 0]
     threshold = sorted(scores, reverse=True)[max(1, len(scores) // 2) - 1]
     selected_sentences = [sentences[i] for i, score in enumerate(scores) if score >= threshold]
@@ -81,7 +81,7 @@ if st.button("🔍 Ringkas Sekarang") and input_text.strip():
     # 5. Output sebagai paragraf utuh
     summary_paragraph = " ".join(selected_sentences)
 
-    st.subheader("📌 Hasil Ringkasan (50% Kalimat Terpenting)")
+    st.subheader("📌 Hasil Ringkasan (10% Kalimat Terpenting)")
     st.markdown(f"""<div style='background-color:#f8bbd0; padding:15px; border-radius:15px; font-size:16px;'>
         {summary_paragraph}
     </div>""", unsafe_allow_html=True)
