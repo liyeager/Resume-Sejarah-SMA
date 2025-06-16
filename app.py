@@ -13,25 +13,34 @@ stopwords = factory_stop.get_stop_words()
 factory_stem = StemmerFactory()
 stemmer = factory_stem.create_stemmer()
 
-st.set_page_config(page_title="LSA Summarizer", layout="wide", page_icon="📘")
+st.set_page_config(page_title="LSA Summarizer - AOT Theme", layout="wide")
 st.markdown("""
     <style>
         body {
-            background-color: #eaf4fb;
+            background-image: url('https://i.ibb.co/X2PG7yQ/aot-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            color: #f8f9fa;
         }
         .reportview-container .main .block-container{
             padding-top: 2rem;
             padding-bottom: 2rem;
+            background-color: rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
         }
         .stButton>button {
             color: white;
-            background-color: #3c91e6;
+            background-color: #223f57;
             border-radius: 8px;
+        }
+        .stTextArea textarea {
+            background-color: #f2f2f2;
+            color: black;
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("📘 LSA Text Summarizer (10% Compression Rate)")
+st.title("🛡️ LSA Summarizer - Attack on Titan Edition")
 
 input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=400)
 
@@ -86,7 +95,7 @@ if st.button("Ringkas Teks"):
         st.dataframe(svd_df, use_container_width=True)
 
         st.subheader(f"📄 Ringkasan Teks (Top {n} kalimat / 10%)")
-        st.markdown(f"<div style='background-color:#d9ecff; padding: 1rem; border-radius: 10px;'>{summary}</div>", unsafe_allow_html=True)
+        st.markdown(f"<div style='background-color:#2c3e50; color:white; padding: 1rem; border-radius: 10px;'>{summary}</div>", unsafe_allow_html=True)
 
     else:
         st.warning("Teks tidak boleh kosong.")
