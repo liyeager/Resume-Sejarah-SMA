@@ -13,32 +13,34 @@ stopwords = factory_stop.get_stop_words()
 factory_stem = StemmerFactory()
 stemmer = factory_stem.create_stemmer()
 
-st.set_page_config(page_title="LSA Summarizer - AOT Theme", layout="wide")
+st.set_page_config(page_title="LSA Summarizer - AOT Edition", layout="wide")
+
+# Custom CSS untuk tema Attack on Titan
 st.markdown("""
     <style>
-        body {
+        html, body, [class*="css"]  {
             background-image: url('https://i.ibb.co/X2PG7yQ/aot-bg.jpg');
             background-size: cover;
             background-attachment: fixed;
             background-repeat: no-repeat;
         }
-        .reportview-container .main .block-container{
-            padding-top: 2rem;
-            padding-bottom: 2rem;
+        .stApp {
             background-color: rgba(0, 0, 0, 0.6);
-            border-radius: 12px;
+        }
+        .block-container {
+            padding: 2rem;
+            border-radius: 15px;
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+        }
+        .stTextArea textarea {
+            background-color: #ffffffcc;
+            color: black;
         }
         .stButton>button {
             color: white;
             background-color: #223f57;
             border-radius: 8px;
-        }
-        .stTextArea textarea {
-            background-color: #f2f2f2;
-            color: black;
-        }
-        header, footer, .st-emotion-cache-1v0mbdj, .st-emotion-cache-z5fcl4 {
-            visibility: hidden;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -83,22 +85,24 @@ if st.button("Ringkas Teks"):
         summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
         # Output
-        st.subheader("Hasil Pemisahan Kalimat")
+        st.subheader("📌 Hasil Pemisahan Kalimat")
         for s in sentences:
             st.markdown(f"- {s}")
 
-        st.subheader("Preprocessing Tiap Kalimat")
+        st.subheader("⚙️ Preprocessing Tiap Kalimat")
         for p in preprocessed_sentences:
             st.markdown(f"- {p}")
 
-        st.subheader("Matriks TF-IDF")
+        st.subheader("📊 Matriks TF-IDF")
         st.dataframe(tfidf_df, use_container_width=True)
 
-        st.subheader("Skor SVD per Kalimat")
+        st.subheader("📈 Skor SVD per Kalimat")
         st.dataframe(svd_df, use_container_width=True)
 
-        st.subheader(f"Ringkasan Teks (Top {n} kalimat / 10%)")
-        st.markdown(f"<div style='background-color:#1c1c1c; color:white; padding: 1rem; border-radius: 10px;'>{summary}</div>", unsafe_allow_html=True)
+        st.subheader(f"📝 Ringkasan Teks (Top {n} kalimat / 10%)")
+        st.markdown(
+            f"<div style='background-color:#0f0f0f; color:white; padding: 1rem; border-radius: 10px; font-size: 16px;'>{summary}</div>",
+            unsafe_allow_html=True)
 
     else:
         st.warning("Teks tidak boleh kosong.")
