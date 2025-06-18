@@ -46,7 +46,7 @@ st.markdown("""
 
 st.title("LSA Summarizer")
 
-input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=400)
+input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=100)
 
 if st.button("Ringkas Teks"):
     if input_text:
@@ -84,7 +84,7 @@ if st.button("Ringkas Teks"):
         summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
         # Output ringkasan saja dalam paragraf
-        st.subheader(f"Ringkasan Teks (Top {n} kalimat / 10%)")
+        st.subheader(f"Ringkasan Teks (10%)")
         st.markdown(
             f"<div style='background-color:#fce4ec; color:#333; padding: 1rem; border-radius: 10px; font-size: 16px;'>{summary}</div>",
             unsafe_allow_html=True)
