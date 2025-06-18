@@ -15,7 +15,7 @@ stemmer = factory_stem.create_stemmer()
 
 st.set_page_config(page_title="LSA Summarizer", layout="wide")
 
-# Custom CSS untuk tema pastel pink dan biru + kontrol lebar text area
+# Custom CSS: tema pastel + input box lebih ramping
 st.markdown("""
     <style>
         .stApp {
@@ -30,7 +30,7 @@ st.markdown("""
         .stTextArea textarea {
             background-color: #ffffff;
             color: black;
-            width: 80% !important;
+            width: 60% !important;
             margin: auto;
         }
         .stButton>button {
@@ -38,10 +38,6 @@ st.markdown("""
             background-color: #ec407a;
             border-radius: 8px;
             padding: 0.5rem 1rem;
-        }
-        .stDataFrame {
-            background-color: white;
-            border-radius: 10px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -55,6 +51,7 @@ if st.button("Ringkas Teks"):
         # Pisahkan kalimat
         sentences = re.split(r'(?<=[.!?])\s+', input_text)
         sentences = [s.strip() for s in sentences if s.strip()]
+        total_kalimat = len(sentences)
 
         # Preprocessing
         preprocessed_sentences = []
@@ -69,24 +66,22 @@ if st.button("Ringkas Teks"):
         # TF-IDF
         vectorizer = TfidfVectorizer()
         X = vectorizer.fit_transform(preprocessed_sentences)
-        features = vectorizer.get_feature_names_out()
-
-        tfidf_df = pd.DataFrame(X.toarray(), columns=features)
-        tfidf_df.insert(0, "Kalimat Asli", sentences)
 
         # SVD
         svd = TruncatedSVD(n_components=1, random_state=42)
         X_svd = svd.fit_transform(X)
         scores = X_svd[:, 0]
-        svd_df = pd.DataFrame({"Kalimat": sentences, "Skor SVD": scores})
 
         # Ringkasan 10%
-        n = max(1, int(len(sentences) * 0.1))
+        n = max(1, int(total_kalimat * 0.1))
         top_indices = np.argsort(-scores)[:n]
         summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
-        # Output ringkasan saja dalam paragraf
-        st.subheader("Ringkasan Teks (10%)")
+        # Tampilkan jumlah kalimat dan ringkasan
+        st.markdown(f"**Jumlah kalimat sebelum diringkas:** {total_kalimat}")
+        st.markdown(f"**Jumlah kalimat setelah diringkas (10%):** {n}")
+
+        st.subheader("Ringkasan Teks")
         st.markdown(
             f"<div style='background-color:#fce4ec; color:#333; padding: 1rem; border-radius: 10px; font-size: 16px;'>{summary}</div>",
             unsafe_allow_html=True)
