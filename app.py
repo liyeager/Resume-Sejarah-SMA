@@ -15,7 +15,7 @@ stemmer = factory_stem.create_stemmer()
 
 st.set_page_config(page_title="LSA Summarizer", layout="wide")
 
-# Custom CSS untuk tema pastel pink dan biru
+# Custom CSS untuk tema pastel pink dan biru + kontrol lebar text area
 st.markdown("""
     <style>
         .stApp {
@@ -30,6 +30,8 @@ st.markdown("""
         .stTextArea textarea {
             background-color: #ffffff;
             color: black;
+            width: 80% !important;
+            margin: auto;
         }
         .stButton>button {
             color: white;
@@ -84,7 +86,7 @@ if st.button("Ringkas Teks"):
         summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
         # Output ringkasan saja dalam paragraf
-        st.subheader(f"Ringkasan Teks (10%)")
+        st.subheader("Ringkasan Teks (10%)")
         st.markdown(
             f"<div style='background-color:#fce4ec; color:#333; padding: 1rem; border-radius: 10px; font-size: 16px;'>{summary}</div>",
             unsafe_allow_html=True)
