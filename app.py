@@ -15,7 +15,7 @@ stemmer = factory_stem.create_stemmer()
 
 st.set_page_config(page_title="LSA Summarizer", layout="wide")
 
-# Custom CSS untuk tema pastel pink dan biru + kontrol lebar text area
+# Custom CSS untuk tema pastel pink dan biru + kontrol ukuran text area
 st.markdown("""
     <style>
         .stApp {
@@ -27,11 +27,11 @@ st.markdown("""
             background-color: #ffffffcc;
             color: #333;
         }
-        .stTextArea textarea {
+        .custom-textarea textarea {
             background-color: #ffffff;
             color: black;
-            width: 60% !important;
-            margin: auto;
+            width: 400px !important;
+            height: 100px !important;
         }
         .stButton>button {
             color: white;
@@ -49,8 +49,8 @@ st.markdown("""
 st.title("LSA Summarizer")
 
 with st.container():
-    st.markdown("<div style='width: 60%; margin:auto;'>", unsafe_allow_html=True)
-    input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=100)
+    st.markdown("<div class='custom-textarea'>", unsafe_allow_html=True)
+    input_text = st.text_area("Masukkan teks panjang untuk diringkas:")
     st.markdown("</div>", unsafe_allow_html=True)
 
 if st.button("Ringkas Teks"):
