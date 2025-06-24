@@ -48,7 +48,7 @@ st.title("LSA Summarizer")
 
 with st.container():
     st.markdown("<div style='width: 50%; margin:auto;'>", unsafe_allow_html=True)
-    input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=60)
+    input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=68)
     st.markdown("</div>", unsafe_allow_html=True)
 
 if st.button("Ringkas Teks"):
