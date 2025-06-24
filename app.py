@@ -30,6 +30,8 @@ st.markdown("""
         .stTextArea textarea {
             background-color: #ffffff;
             color: black;
+            width: 60% !important;
+            margin: auto;
         }
         .stButton>button {
             color: white;
@@ -47,8 +49,8 @@ st.markdown("""
 st.title("LSA Summarizer")
 
 with st.container():
-    st.markdown("<div style='width: 50%; margin:auto;'>", unsafe_allow_html=True)
-    input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=68)
+    st.markdown("<div style='width: 60%; margin:auto;'>", unsafe_allow_html=True)
+    input_text = st.text_area("Masukkan teks panjang untuk diringkas:", height=100)
     st.markdown("</div>", unsafe_allow_html=True)
 
 if st.button("Ringkas Teks"):
@@ -86,12 +88,8 @@ if st.button("Ringkas Teks"):
         top_indices = np.argsort(-scores)[:n]
         summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
-        # Tampilkan jumlah kalimat sebelum dan sesudah
-        st.markdown(f"**Jumlah Kalimat Sebelum Ringkasan:** {len(sentences)}")
-        st.markdown(f"**Jumlah Kalimat Setelah Ringkasan (10%):** {n}")
-
         # Output ringkasan saja dalam paragraf
-        st.subheader("Ringkasan Teks")
+        st.subheader("Ringkasan Teks (Compression Rate 10%)")
         st.markdown(
             f"<div style='background-color:#fce4ec; color:#333; padding: 1rem; border-radius: 10px; font-size: 16px;'>{summary}</div>",
             unsafe_allow_html=True)
