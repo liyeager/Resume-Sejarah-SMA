@@ -13,9 +13,10 @@ stopwords = factory_stop.get_stop_words()
 factory_stem = StemmerFactory()
 stemmer = factory_stem.create_stemmer()
 
+# Konfigurasi halaman
 st.set_page_config(page_title="LSA Summarizer", layout="wide")
 
-# Custom CSS untuk tema pastel pink dan biru + kontrol ukuran text area
+# Tema CSS pastel
 st.markdown("""
     <style>
         .stApp {
@@ -39,19 +40,18 @@ st.markdown("""
             border-radius: 8px;
             padding: 0.5rem 1rem;
         }
-        .stDataFrame {
-            background-color: white;
-            border-radius: 10px;
-        }
     </style>
 """, unsafe_allow_html=True)
 
 st.title("LSA Summarizer")
 
+# Input teks dan compression rate
 with st.container():
     st.markdown("<div class='custom-textarea'>", unsafe_allow_html=True)
     input_text = st.text_area("Masukkan teks panjang untuk diringkas:")
     st.markdown("</div>", unsafe_allow_html=True)
+
+compression_option = st.selectbox("Pilih Compression Rate", ["50%", "30%", "10%"])
 
 if st.button("Ringkas Teks"):
     if input_text:
@@ -72,24 +72,28 @@ if st.button("Ringkas Teks"):
         # TF-IDF
         vectorizer = TfidfVectorizer()
         X = vectorizer.fit_transform(preprocessed_sentences)
-        features = vectorizer.get_feature_names_out()
-
-        tfidf_df = pd.DataFrame(X.toarray(), columns=features)
-        tfidf_df.insert(0, "Kalimat Asli", sentences)
 
         # SVD
         svd = TruncatedSVD(n_components=1, random_state=42)
-        X_svd = svd.fit_transform(X)
-        scores = X_svd[:, 0]
-        svd_df = pd.DataFrame({"Kalimat": sentences, "Skor SVD": scores})
+        scores = svd.fit_transform(X)[:, 0]
 
-        # Ringkasan 10%
-        n = max(1, int(len(sentences) * 0.1))
+        # Tentukan jumlah kalimat berdasarkan compression rate
+        total_sentences = len(sentences)
+        if compression_option == "50%":
+            n = max(1, int(total_sentences * 0.5))
+        elif compression_option == "30%":
+            n = max(1, int(total_sentences * 0.3))
+        else:
+            n = max(1, int(total_sentences * 0.1))
+
+        # Pilih kalimat berdasarkan skor tertinggi
         top_indices = np.argsort(-scores)[:n]
         summary = " ".join([sentences[i] for i in sorted(top_indices)])
 
-        # Output ringkasan saja dalam paragraf
-        st.subheader("Ringkasan Teks (Compression Rate 10%)")
+        # Tampilkan hasil
+        st.subheader(f"Ringkasan Teks (Compression Rate {compression_option})")
+        st.markdown(f"**Jumlah Kalimat Asli:** {total_sentences}")
+        st.markdown(f"**Jumlah Kalimat Setelah Ringkasan:** {n}")
         st.markdown(
             f"<div style='background-color:#fce4ec; color:#333; padding: 1rem; border-radius: 10px; font-size: 16px;'>{summary}</div>",
             unsafe_allow_html=True)
